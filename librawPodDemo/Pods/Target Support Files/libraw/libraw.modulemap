@@ -1,0 +1,6 @@
+module internal {
+  umbrella header "libraw-umbrella.h"
+
+  export *
+  module * { export * }
+}

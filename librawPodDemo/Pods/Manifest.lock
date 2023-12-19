@@ -1,0 +1,16 @@
+PODS:
+  - libraw (0.0.1)
+
+DEPENDENCIES:
+  - libraw (from `../`)
+
+EXTERNAL SOURCES:
+  libraw:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  libraw: f5300bbbd96439cae36527a26d64158bdf61d6bb
+
+PODFILE CHECKSUM: 917f3d18eb0c9c418473857f8b9106841833de6f
+
+COCOAPODS: 1.13.0
