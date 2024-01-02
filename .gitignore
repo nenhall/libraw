@@ -31,5 +31,9 @@
 *.out
 *.app
 
+**/.idea
+**/.cmake
+**/.qt
+
 cmake-build-debug
 build-arm64
