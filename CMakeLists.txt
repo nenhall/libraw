@@ -38,6 +38,12 @@ set(LIBRAW_ENABLE_RAWSPEED ON CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(libraw_external)
 
+# 删除 LibRaw 源码中的 .git 目录以避免 git 子模块问题
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/third_party/LibRaw/src/.git")
+    message(STATUS "删除 LibRaw 源码中的 .git 目录")
+    file(REMOVE_RECURSE "${CMAKE_CURRENT_SOURCE_DIR}/third_party/LibRaw/src/.git")
+endif()
+
 # 添加 LibRaw 子目录（LibRaw 不原生支持 CMake，使用项目提供的构建配置）
 add_subdirectory(third_party/LibRaw)
 
