@@ -34,6 +34,7 @@ add_library(PixRaw STATIC
 target_include_directories(PixRaw PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/libraw/src
 )
 
 target_link_libraries(PixRaw

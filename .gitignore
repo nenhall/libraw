@@ -60,6 +60,7 @@ CMakeLists.txt.user*
 *.opensdf
 *.vcxproj
 *vcxproj.*
+.claude/
 
 # MinGW generated files
 *.Debug
