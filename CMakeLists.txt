@@ -10,8 +10,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 option(PIX_RAW_BUILD_C_API "Build C API" OFF)
 option(PIX_RAW_INSTALL "Generate install target" OFF)
 
-# 依赖 LibRaw
-add_subdirectory(third_party/libraw)
+# 依赖 LibRaw - 使用 FetchContent 下载
+include(FetchContent)
+
+FetchContent_Declare(
+    libraw
+    GIT_REPOSITORY https://github.com/LibRaw/LibRaw.git
+    GIT_TAG        0.22.0
+    SOURCE_DIR     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/LibRaw/src
+)
+
+FetchContent_MakeAvailable(libraw)
 
 # === 核心库 (C++) ===
 add_library(PixRaw STATIC
