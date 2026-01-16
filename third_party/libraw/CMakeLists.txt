@@ -38,7 +38,7 @@ if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/metadata/mediumformat_stub.cpp")
 #include \"libraw/libraw.h\"
 #include \"internal/dcraw_defs.h\"
 
-void LibRaw::parse_phase_one(int base)
+void LibRaw::parse_phase_one(INT64 base)
 {
     (void)base;
 }
