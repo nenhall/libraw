@@ -1,56 +1,81 @@
-cmake_minimum_required(VERSION 3.26)
-project(PixRaw)
+cmake_minimum_required(VERSION 3.16)
 
+project(PixRaw VERSION 1.0.0 LANGUAGES C CXX)
+
+# C++ 标准
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(ZLIB REQUIRED)
-if (ZLIB_FOUND)
-    # 包括zlib头文件目录
-    message(STATUS "ZLIB被成功找到：${ZLIB_INCLUDE_DIRS}")
-    message(STATUS ${ZLIB_LIBRARIES})
-    include_directories(${ZLIB_INCLUDE_DIRS})
-else ()
-    message(STATUS "ZLIB没有找到")
-endif ()
+# 选项
+option(PIX_RAW_BUILD_C_API "Build C API" OFF)
+option(PIX_RAW_INSTALL "Generate install target" OFF)
 
-include_directories(${PROJECT_SOURCE_DIR}/libraw
-#        ${PROJECT_SOURCE_DIR}/libraw/src
+# 依赖 LibRaw
+add_subdirectory(third_party/libraw)
+
+# === 核心库 (C++) ===
+add_library(PixRaw STATIC
+    src/PixRaw.cpp
+    src/RawImage.cpp
+    src/RawMetadata.cpp
+    src/RawData.cpp
+    src/ImageAdjuster.cpp
 )
 
-file(GLOB SRC_FILES
-        "${PROJECT_SOURCE_DIR}/libraw/src/decoders/*.h"
-        "${PROJECT_SOURCE_DIR}/libraw/src/decoders/*.cpp"
-        "${PROJECT_SOURCE_DIR}/libraw/src/demosaic/*.h"
-        "${PROJECT_SOURCE_DIR}/libraw/src/demosaic/*.cpp"
-        "${PROJECT_SOURCE_DIR}/libraw/src/integration/*.h"
-        "${PROJECT_SOURCE_DIR}/libraw/src/integration/*.cpp"
-        "${PROJECT_SOURCE_DIR}/libraw/src/metadata/*.h"
-        "${PROJECT_SOURCE_DIR}/libraw/src/metadata/*.cpp"
-        "${PROJECT_SOURCE_DIR}/libraw/src/postprocessing/*.h"
-        "${PROJECT_SOURCE_DIR}/libraw/src/postprocessing/*.cpp"
-        "${PROJECT_SOURCE_DIR}/libraw/src/preprocessing/*.h"
-        "${PROJECT_SOURCE_DIR}/libraw/src/preprocessing/*.cpp"
-        "${PROJECT_SOURCE_DIR}/libraw/src/tables/*.h"
-        "${PROJECT_SOURCE_DIR}/libraw/src/tables/*.cpp"
-        "${PROJECT_SOURCE_DIR}/libraw/src/utils/*.h"
-        "${PROJECT_SOURCE_DIR}/libraw/src/utils/*.cpp"
-        "${PROJECT_SOURCE_DIR}/libraw/src/write/*.h"
-        "${PROJECT_SOURCE_DIR}/libraw/src/write/*.cpp"
-        "${PROJECT_SOURCE_DIR}/libraw/src/x3f/*.h"
-        "${PROJECT_SOURCE_DIR}/libraw/src/x3f/*.cpp"
-        "${PROJECT_SOURCE_DIR}/libraw/src/*.cpp"
+target_include_directories(PixRaw PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
 )
 
-# 创建一个忽略包含_ph的文件的列表
-set(SOURCE_FILES_FILTERED "")
-foreach(FILE ${SRC_FILES})
-    if(NOT FILE MATCHES "_ph")
-        list(APPEND SOURCE_FILES_FILTERED ${FILE})
-    endif()
-endforeach()
+target_link_libraries(PixRaw
+    PUBLIC
+        libraw
+)
 
-add_library(PixRaw SHARED ${SOURCE_FILES_FILTERED} library.cpp)
-add_executable(PixRawTest ${SOURCE_FILES_FILTERED} library.cpp)
+# MSVC specific
+if(MSVC)
+    target_compile_options(PixRaw PUBLIC /bigobj)
+endif()
 
-target_link_libraries(PixRaw PRIVATE ${ZLIB_LIBRARIES})
-target_link_libraries(PixRawTest PRIVATE ${ZLIB_LIBRARIES})
+# 导出宏（如果是共享库）
+# target_compile_definitions(RawProcessor PRIVATE RAW_PROCESSOR_EXPORTS)
+
+# === 安装规则（可选）===
+if(PIX_RAW_INSTALL)
+    include(GNUInstallDirs)
+
+    # 安装库
+    install(TARGETS PixRaw
+        EXPORT PixRawTargets
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
+
+    # 安装头文件
+    install(DIRECTORY include/
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        FILES_MATCHING PATTERN "*.h"
+    )
+
+    # 导出 CMake 目标
+    install(EXPORT PixRawTargets
+        FILE PixRawTargets.cmake
+        NAMESPACE PixRaw::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/PixRaw
+    )
+
+    # 创建配置文件
+    include(CMakePackageConfigHelpers)
+    write_basic_package_version_file(
+        "${CMAKE_CURRENT_BINARY_DIR}/PixRawConfigVersion.cmake"
+        VERSION ${PROJECT_VERSION}
+        COMPATIBILITY SameMajorVersion
+    )
+
+    install(FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/PixRawConfigVersion.cmake"
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/PixRaw
+    )
+endif()

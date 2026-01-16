@@ -1,0 +1,21 @@
+/* Stub functions for LibRaw - replaces problematic mediumformat.cpp */
+
+#define LIBRAW_LIBRARY_BUILD
+#include "libraw/libraw.h"
+#include "internal/dcraw_defs.h"
+
+// These stubs replace the functions in mediumformat.cpp which causes
+// MSVC Internal Compiler Error. Phase One and Leaf MOS format support
+// is disabled as a trade-off for build compatibility.
+
+void LibRaw::parse_phase_one(int base)
+{
+    // Stub - does not parse Phase One raw files
+    (void)base;
+}
+
+void LibRaw::parse_mos(INT64 offset)
+{
+    // Stub - does not parse Leaf MOS files
+    (void)offset;
+}
